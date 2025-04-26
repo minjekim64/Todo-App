@@ -1,12 +1,10 @@
-# React + Vite
+###  최소 요구 사항
+1. Todo 생성 / 조회 / 수정 / 삭제 (**CRUD**) 기능을 구현하세요.
+2. **현재 시간 표시, 타이머, 스톱워치** 중 하나 이상의 기능을 구현하세요.
+3. **랜덤 명언**을 표시할 수 있는 컴포넌트를 만드세요.
+4. **useState**, **useEffect**, **useRef**를 각각 한 번 이상 사용하세요.
+5. 자유롭게 적용해보고 싶은 CSS를 작성해보세요.
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
-
-Currently, two official plugins are available:
-
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### 심화 요구 사항
+1. **json-server**를 사용해 Todo 정보를 파일로 저장해 보세요.
+2. **Custom Hook**을 만들고 사용해 보세요.
