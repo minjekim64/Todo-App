@@ -2,18 +2,100 @@ import { useEffect, useRef, useState } from 'react';
 import './App.css';
 
 function App() {
-  const [todo, setTodo] = useState([
-    {id: Date.now(), content: '안녕하세요'}
-  ]);
+  const [data, isLoading] = useFetch("http://localhost:3000/todo");
+  const [todo, setTodo] = useState([]);
+  const [currentTodo, setCurrentTodo] = useState(null);
+  const [time, setTime] = useState(0);
+  const [isTimer, setIsTimer] = useState(false);
+
+
+  useEffect(() => {
+    data && setTodo(data);
+  }, [isLoading, data]);
+
+  useEffect(() => {
+    setTime(0);
+  }, [isTimer]);
+
+  useEffect(() => {
+    if (currentTodo) {
+      fetch(`http://localhost:3000/todo/${currentTodo}`, {
+        method: "PATCH",
+        body: JSON.stringify({
+          time: todo.find(el => el.id === currentTodo).time + 1
+        }),
+      }).then(res => res.json())
+      .then(res => setTodo(prev => prev.map((el) => el.id === currentTodo ? res : el)))
+    }
+  }, [todo, currentTodo, time]);
 
   return (
     <>
-      <Advice />
       <Clock />
-      <StopWatch />
-      <Timer />
+      <Advice />
+      <button onClick={() => setIsTimer(prev => !prev)}>{isTimer ? ' 타이머로 변경' : '스탑워치로 변경'}</button>
+      {isTimer ? <StopWatch time = {time} setTime = {setTime}/>  
+      : <Timer time = {time} setTime = {setTime}/>}
       <InputTodo setTodo = {setTodo} />
-      <TodoList todo = {todo} setTodo = {setTodo} />
+      <TodoList todo = {todo} setTodo = {setTodo} currentTodo = {currentTodo} setCurrentTodo = {setCurrentTodo}/>
+    </>
+  );
+}
+
+const TodoList = ({todo, setTodo, currentTodo, setCurrentTodo}) => {
+  return (
+    <ul>
+      {todo.map((todo) => 
+        <Todo key={todo.id} todo = {todo} setTodo = {setTodo} currentTodo = {currentTodo} setCurrentTodo = {setCurrentTodo} />
+      )}
+    </ul>
+  );
+}
+
+const Todo = ({todo, setTodo, currentTodo, setCurrentTodo}) => {
+  return (
+    <li className = {currentTodo === todo.id ? "current" : ""}>
+      <div>
+        {todo.content}
+        <br />
+        {formatTime(todo.time)}
+      </div>
+      <button onClick={() => setCurrentTodo(todo.id)}>시작하기</button>
+      <button onClick={() => {
+        fetch(`http://localhost:3000/todo/${todo.id}`, {
+          method: "DELETE",
+        }).then(res => {
+          if(res.ok) {
+            setTodo(prev => prev.filter(el =>
+              el.id !== todo.id
+            ))
+          }
+        })
+      }}>삭제</button>
+    </li>
+  );
+}
+
+const InputTodo = ({setTodo}) => {
+  const inputRef = useRef(null);
+
+  const addTodoHandler = () => {
+    const newTodo = {
+      content: inputRef.current.value,
+      time: 0,
+    };
+    // 상태가 아닌 json-server에 넣기
+    fetch("http://localhost:3000/todo", {
+      method: "POST",
+      body: JSON.stringify(newTodo)
+    }).then(res => res.json())
+    .then(data => setTodo(prev => [...prev, data]))
+  }
+
+  return (
+    <>
+      <input type="text" ref={inputRef}/>
+      <button onClick={addTodoHandler}>추가</button>
     </>
   );
 }
@@ -41,7 +123,6 @@ const useFetch = (url) => {
 }
 
 const Advice = () => {
-  
   const [data, isLoading, error] = useFetch('https://korean-advice-open-api.vercel.app/api/advice');
 
   return (
@@ -76,8 +157,7 @@ const formatTime = (seconds) => {
   return `${String(Math.floor(seconds / 3600)).padStart(2, '0')} : ${String(Math.floor((seconds % 3600) / 60)).padStart(2, '0')} : ${String(Math.floor(seconds % 60)).padStart(2, '0')}`;
 }
 
-const StopWatch = () => {
-  const [time, setTime] = useState(0);
+const StopWatch = ({time, setTime}) => {
   const [isOn, setIsOn] = useState(false);
   const timerRef = useRef(null);
   console.log(timerRef)
@@ -108,10 +188,9 @@ const StopWatch = () => {
   )
 }
 
-const Timer = () => {
+const Timer = ({time, setTime}) => {
   const [startTime, setStartTime] = useState(0);
   const [isOn, setIsOn] = useState(false);
-  const [time, setTime] = useState(0);
   const timerRef = useRef(null);
 
   useEffect(() => {
@@ -152,45 +231,6 @@ const Timer = () => {
   );
 }
 
-const TodoList = ({todo, setTodo}) => {
-  return (
-    <ul>
-      {todo.map((todo) => 
-        <Todo key={todo.id} todo = {todo} setTodo = {setTodo} />
-      )}
-    </ul>
-  );
-}
 
-const Todo = ({todo, setTodo}) => {
-  return (
-    <li>
-      {todo.content}
-      <button onClick={() => {
-        setTodo(prev => prev.filter(el =>
-          el.id !== todo.id
-        ))
-      }}>삭제</button>
-    </li>
-  );
-}
-
-const InputTodo = ({setTodo}) => {
-  const inputRef = useRef(null);
-
-  const addTodoHandler = () => {
-    const newTodo = {
-      id: Date.now(), content: inputRef.current.value
-    };
-    setTodo(prev => [...prev, newTodo]);
-  }
-
-  return (
-    <>
-      <input type="text" ref={inputRef}/>
-      <button onClick={addTodoHandler}>추가</button>
-    </>
-  );
-}
 
 export default App

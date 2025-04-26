@@ -6,3 +6,6 @@
   box-sizing: border-box;
 }
 
+.current {
+  background-color: rgb(37, 4, 44);
+}
