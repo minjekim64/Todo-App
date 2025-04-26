@@ -1,4 +1,3 @@
-
 import { useEffect, useRef, useState } from 'react';
 import './App.css';
 
@@ -9,12 +8,53 @@ function App() {
 
   return (
     <>
+      <Advice />
       <Clock />
       <StopWatch />
       <Timer />
       <InputTodo setTodo = {setTodo} />
       <TodoList todo = {todo} setTodo = {setTodo} />
     </>
+  );
+}
+
+const useFetch = (url) => {
+  const [data, setData] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
+  
+  useEffect(() => {
+    setIsLoading(true);
+    
+    fetch(url)
+    .then(res => res.json())
+    .then(data => {
+      setData(data);
+      setIsLoading(false);
+    })
+    .catch(error => {
+      setError(error);
+      setIsLoading(false);
+    })
+  }, [url]);
+  return [data, isLoading, error];
+}
+
+const Advice = () => {
+  
+  const [data, isLoading, error] = useFetch('https://korean-advice-open-api.vercel.app/api/advice');
+
+  return (
+    <div>
+      {isLoading && <p>로딩 중..</p>}
+      {error && <p>에러 발생: {error.message}</p>}
+      {!isLoading && !error && data && (
+        <>
+          <p>{data.message}</p>
+          <p>-{data.author}-</p>
+        </>
+      )}
+    </div>
   );
 }
 
